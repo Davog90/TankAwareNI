@@ -8,9 +8,9 @@ import { ForecastScreen } from '../screens/ForecastScreen';
 import { MarketScreen } from '../screens/MarketScreen';
 import { AlertsScreen } from '../screens/AlertsScreen';
 import { SmartCityScreen } from '../screens/SmartCityScreen';
+import { useAlerts } from '../hooks';
 import { colors, typography } from '../theme';
 import type { RootTabParamList } from './types';
-import { alerts } from '../data/mockData';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
@@ -39,51 +39,57 @@ const tabIcons: Record<
   SmartCity: { active: 'business', inactive: 'business-outline' },
 };
 
-const unreadAlerts = alerts.filter((alert) => !alert.read).length;
+function MainTabs() {
+  const { unreadCount } = useAlerts();
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.tabInactive,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarStyle: styles.tabBar,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = tabIcons[route.name];
+          return (
+            <Ionicons
+              name={focused ? icons.active : icons.inactive}
+              size={size - 1}
+              color={color}
+            />
+          );
+        },
+      })}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{ tabBarLabel: 'Home' }}
+      />
+      <Tab.Screen name="Forecast" component={ForecastScreen} />
+      <Tab.Screen name="Market" component={MarketScreen} />
+      <Tab.Screen
+        name="Alerts"
+        component={AlertsScreen}
+        options={{
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadgeStyle: styles.badge,
+        }}
+      />
+      <Tab.Screen
+        name="SmartCity"
+        component={SmartCityScreen}
+        options={{ tabBarLabel: 'Region' }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 export function AppNavigator() {
   return (
     <NavigationContainer theme={navTheme}>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.tabInactive,
-          tabBarLabelStyle: styles.tabLabel,
-          tabBarStyle: styles.tabBar,
-          tabBarIcon: ({ focused, color, size }) => {
-            const icons = tabIcons[route.name];
-            return (
-              <Ionicons
-                name={focused ? icons.active : icons.inactive}
-                size={size - 1}
-                color={color}
-              />
-            );
-          },
-        })}
-      >
-        <Tab.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          options={{ tabBarLabel: 'Home' }}
-        />
-        <Tab.Screen name="Forecast" component={ForecastScreen} />
-        <Tab.Screen name="Market" component={MarketScreen} />
-        <Tab.Screen
-          name="Alerts"
-          component={AlertsScreen}
-          options={{
-            tabBarBadge: unreadAlerts > 0 ? unreadAlerts : undefined,
-            tabBarBadgeStyle: styles.badge,
-          }}
-        />
-        <Tab.Screen
-          name="SmartCity"
-          component={SmartCityScreen}
-          options={{ tabBarLabel: 'Region' }}
-        />
-      </Tab.Navigator>
+      <MainTabs />
     </NavigationContainer>
   );
 }

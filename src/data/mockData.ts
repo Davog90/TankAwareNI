@@ -8,7 +8,7 @@ import type {
   SmartCityStats,
   TankInfo,
   UsageStat,
-} from '../types';
+} from '../models';
 
 export const household: Household = {
   name: 'The Murphy Home',

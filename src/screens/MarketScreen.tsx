@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../components/common/Card';
+import { ErrorView, LoadingView } from '../components/common/StateViews';
 import { SectionLabel } from '../components/common/SectionLabel';
 import { CurrentPriceHero } from '../components/market/CurrentPriceHero';
 import {
@@ -11,12 +12,20 @@ import {
 import { RecommendationBanner } from '../components/market/RecommendationBanner';
 import { SupplierRow } from '../components/market/SupplierRow';
 import { TrendIndicatorCard } from '../components/market/TrendIndicatorCard';
-import { marketSummary } from '../data/mockData';
+import { useMarketData } from '../hooks';
 import { colors, spacing, typography } from '../theme';
 import { formatRelativeTime } from '../utils/formatters';
 
 export function MarketScreen() {
-  const market = marketSummary;
+  const { data: market, loading, error, reload } = useMarketData();
+
+  if (loading && !market) {
+    return <LoadingView label="Loading market data…" />;
+  }
+
+  if (error || !market) {
+    return <ErrorView message={error?.message} onRetry={reload} />;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

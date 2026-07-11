@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/common/Card';
+import { ErrorView, LoadingView } from '../components/common/StateViews';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { FuelPovertyRiskCard } from '../components/smartcity/FuelPovertyRiskCard';
 import {
@@ -11,12 +12,20 @@ import {
   RegionalAverageTrendChart,
   TankLevelDistributionChart,
 } from '../components/smartcity/RegionalCharts';
-import { smartCityStats } from '../data/mockData';
+import { useSmartCityData } from '../hooks';
 import { colors, radii, spacing, typography } from '../theme';
 import { formatRelativeTime } from '../utils/formatters';
 
 export function SmartCityScreen() {
-  const stats = smartCityStats;
+  const { data: stats, loading, error, reload } = useSmartCityData();
+
+  if (loading && !stats) {
+    return <LoadingView label="Loading regional analytics…" />;
+  }
+
+  if (error || !stats) {
+    return <ErrorView message={error?.message} onRetry={reload} />;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>

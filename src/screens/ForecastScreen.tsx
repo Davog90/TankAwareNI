@@ -3,18 +3,27 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/common/Card';
+import { ErrorView, LoadingView } from '../components/common/StateViews';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { ConfidenceScoreCard } from '../components/forecast/ConfidenceScoreCard';
 import { DepletionLineChart } from '../components/forecast/DepletionLineChart';
 import { WeatherImpactCard } from '../components/forecast/WeatherImpactCard';
-import {
-  depletionSeries,
-  forecastSummary,
-  tankInfo,
-} from '../data/mockData';
+import { useForecastData } from '../hooks';
 import { colors, radii, spacing, typography } from '../theme';
 
 export function ForecastScreen() {
+  const { data, loading, error, reload } = useForecastData();
+
+  if (loading && !data) {
+    return <LoadingView label="Loading forecast…" />;
+  }
+
+  if (error || !data) {
+    return <ErrorView message={error?.message} onRetry={reload} />;
+  }
+
+  const { summary: forecastSummary, depletionSeries, tankInfo } = data;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView

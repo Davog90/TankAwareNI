@@ -9,9 +9,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertCard } from '../components/alerts/AlertCard';
 import { Card } from '../components/common/Card';
-import { alerts as mockAlerts } from '../data/mockData';
+import { ErrorView, LoadingView } from '../components/common/StateViews';
+import { useAlerts } from '../hooks';
 import { colors, radii, spacing, typography } from '../theme';
-import type { AlertItem as AlertItemType, AlertSeverity } from '../types';
+import type { AlertSeverity } from '../models';
 
 type FilterKey = 'all' | 'unread' | AlertSeverity;
 
@@ -24,13 +25,16 @@ const severityFilters: Array<{ key: FilterKey; label: string }> = [
 ];
 
 export function AlertsScreen() {
+  const {
+    alerts: items,
+    loading,
+    error,
+    unreadCount,
+    reload,
+    markAsRead,
+    markAllRead,
+  } = useAlerts();
   const [filter, setFilter] = useState<FilterKey>('all');
-  const [items, setItems] = useState<AlertItemType[]>(mockAlerts);
-
-  const unreadCount = useMemo(
-    () => items.filter((item) => !item.read).length,
-    [items],
-  );
 
   const criticalCount = useMemo(
     () => items.filter((item) => item.severity === 'critical').length,
@@ -47,17 +51,13 @@ export function AlertsScreen() {
     return items;
   }, [filter, items]);
 
-  const markAllRead = () => {
-    setItems((current) => current.map((item) => ({ ...item, read: true })));
-  };
+  if (loading && items.length === 0) {
+    return <LoadingView label="Loading alerts…" />;
+  }
 
-  const toggleRead = (id: string) => {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, read: !item.read } : item,
-      ),
-    );
-  };
+  if (error && items.length === 0) {
+    return <ErrorView message={error.message} onRetry={reload} />;
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -100,7 +100,13 @@ export function AlertsScreen() {
             ))}
           </ScrollView>
           {unreadCount > 0 ? (
-            <Pressable onPress={markAllRead} hitSlop={8} style={styles.markReadBtn}>
+            <Pressable
+              onPress={() => {
+                void markAllRead();
+              }}
+              hitSlop={8}
+              style={styles.markReadBtn}
+            >
               <Text style={styles.markRead}>Mark all read</Text>
             </Pressable>
           ) : null}
@@ -118,7 +124,9 @@ export function AlertsScreen() {
             <AlertCard
               key={alert.id}
               alert={alert}
-              onPress={() => toggleRead(alert.id)}
+              onPress={() => {
+                void markAsRead(alert.id, !alert.read);
+              }}
             />
           ))
         )}

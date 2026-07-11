@@ -4,13 +4,26 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/common/Card';
+import { ErrorView, LoadingView } from '../components/common/StateViews';
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { TankLevelGauge } from '../components/dashboard/TankLevelGauge';
-import { household, tankInfo } from '../data/mockData';
+import { useDashboardData } from '../hooks';
 import { colors, radii, spacing, typography } from '../theme';
 import { formatLitres, formatRelativeTime } from '../utils/formatters';
 
 export function DashboardScreen() {
+  const { data, loading, error, reload } = useDashboardData();
+
+  if (loading && !data) {
+    return <LoadingView label="Loading dashboard…" />;
+  }
+
+  if (error || !data) {
+    return <ErrorView message={error?.message} onRetry={reload} />;
+  }
+
+  const { household, tankInfo } = data;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
