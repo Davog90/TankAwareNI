@@ -74,16 +74,42 @@ export interface SupplierQuote {
   isBestValue?: boolean;
 }
 
-export interface MarketSummary {
+export type MarketTrendDirection = 'rising' | 'falling' | 'stable';
+
+export type BuyRecommendation = 'BUY NOW' | 'WAIT' | 'MONITOR';
+
+export interface PriceForecastPoint {
+  dayIndex: number;
+  date: string;
+  label: string;
+  pricePpl: number;
+  isProjected?: boolean;
+}
+
+export interface MarketIntelligence {
+  currentPricePpl: number;
+  weeklyTrend: MarketTrendDirection;
+  weeklyTrendLabel: string;
+  weeklyChangePpl: number;
+  weeklyChangePercent: number;
+  forecastChangePercent: number;
+  forecastHorizonDays: number;
+  forecastLabel: string;
+  recommendation: BuyRecommendation;
+  recommendationReason: string;
+  region: string;
+  lastUpdated: string;
+  weekLowPpl: number;
+  weekHighPpl: number;
+  history: PricePoint[];
+  forecastSeries: PriceForecastPoint[];
+  suppliers: SupplierQuote[];
+}
+
+export interface MarketSummary extends MarketIntelligence {
   currentAveragePpl: number;
   changeTodayPpl: number;
   changeWeekPpl: number;
-  weekLowPpl: number;
-  weekHighPpl: number;
-  region: string;
-  lastUpdated: string;
-  history: PricePoint[];
-  suppliers: SupplierQuote[];
 }
 
 export interface AlertItem {

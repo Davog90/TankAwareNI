@@ -2,53 +2,89 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../components/common/Card';
-import { ScreenHeader } from '../components/common/ScreenHeader';
 import { SectionLabel } from '../components/common/SectionLabel';
-import { PriceCard } from '../components/market/PriceCard';
-import { PriceTrendChart } from '../components/market/PriceTrendChart';
+import { CurrentPriceHero } from '../components/market/CurrentPriceHero';
+import {
+  ForecastMovementChart,
+  WeeklyTrendChart,
+} from '../components/market/MarketPriceCharts';
+import { RecommendationBanner } from '../components/market/RecommendationBanner';
 import { SupplierRow } from '../components/market/SupplierRow';
+import { TrendIndicatorCard } from '../components/market/TrendIndicatorCard';
 import { marketSummary } from '../data/mockData';
 import { colors, spacing, typography } from '../theme';
 import { formatRelativeTime } from '../utils/formatters';
 
 export function MarketScreen() {
+  const market = marketSummary;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader
-          title="Market"
-          subtitle={`Heating oil prices · updated ${formatRelativeTime(marketSummary.lastUpdated)}`}
-        />
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>Market intelligence</Text>
+          <Text style={styles.title}>Market</Text>
+          <Text style={styles.subtitle}>
+            NI heating oil prices, trends, and buy guidance
+          </Text>
+        </View>
 
-        <PriceCard
-          averagePpl={marketSummary.currentAveragePpl}
-          changeTodayPpl={marketSummary.changeTodayPpl}
-          changeWeekPpl={marketSummary.changeWeekPpl}
-          region={marketSummary.region}
+        <CurrentPriceHero
+          pricePpl={market.currentPricePpl}
+          region={market.region}
+          trend={market.weeklyTrend}
+          trendLabel={market.weeklyTrendLabel}
+          weeklyChangePercent={market.weeklyChangePercent}
+          updatedLabel={`Updated ${formatRelativeTime(market.lastUpdated)}`}
         />
 
         <View style={styles.section}>
-          <PriceTrendChart
-            history={marketSummary.history}
-            weekLow={marketSummary.weekLowPpl}
-            weekHigh={marketSummary.weekHighPpl}
+          <TrendIndicatorCard
+            trend={market.weeklyTrend}
+            trendLabel={market.weeklyTrendLabel}
+            weeklyChangePpl={market.weeklyChangePpl}
+            weeklyChangePercent={market.weeklyChangePercent}
+            weekLowPpl={market.weekLowPpl}
+            weekHighPpl={market.weekHighPpl}
           />
         </View>
 
-        <Card style={styles.noteCard}>
-          <Text style={styles.noteTitle}>Buying tip</Text>
-          <Text style={styles.noteBody}>
-            Prices below 69p/L are generally favourable in Northern Ireland.
-            Compare at least two suppliers before ordering 500 L or more.
-          </Text>
-        </Card>
+        <View style={styles.section}>
+          <Card style={styles.forecastCard}>
+            <Text style={styles.forecastLabel}>Forecasted price movement</Text>
+            <Text style={styles.forecastValue}>{market.forecastLabel}</Text>
+            <Text style={styles.forecastHint}>
+              Simulated outlook for the next {market.forecastHorizonDays} days
+            </Text>
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <RecommendationBanner
+            recommendation={market.recommendation}
+            reason={market.recommendationReason}
+            forecastLabel={market.forecastLabel}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <WeeklyTrendChart history={market.history} />
+        </View>
+
+        <View style={styles.section}>
+          <ForecastMovementChart
+            forecastSeries={market.forecastSeries}
+            forecastChangePercent={market.forecastChangePercent}
+            currentPricePpl={market.currentPricePpl}
+          />
+        </View>
 
         <View style={styles.section}>
           <SectionLabel title="Local supplier quotes" icon="storefront-outline" />
-          {marketSummary.suppliers.map((supplier) => (
+          {market.suppliers.map((supplier) => (
             <SupplierRow key={supplier.id} supplier={supplier} />
           ))}
         </View>
@@ -66,20 +102,47 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: spacing.huge,
   },
-  section: {
-    marginTop: spacing.xxl,
+  header: {
+    marginBottom: spacing.xl,
   },
-  noteCard: {
-    marginTop: spacing.xxl,
-    backgroundColor: colors.accentSoft,
-    borderColor: '#F0D9B0',
+  eyebrow: {
+    ...typography.label,
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  noteTitle: {
-    ...typography.bodyBold,
-    color: colors.accent,
+  title: {
+    ...typography.title,
+    color: colors.text,
+    marginTop: spacing.xs,
   },
-  noteBody: {
+  subtitle: {
     ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  section: {
+    marginBottom: spacing.md,
+  },
+  forecastCard: {
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
+  },
+  forecastLabel: {
+    ...typography.label,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+  },
+  forecastValue: {
+    ...typography.heading,
+    color: colors.accent,
+    marginTop: spacing.sm,
+  },
+  forecastHint: {
+    ...typography.caption,
     color: colors.textSecondary,
     marginTop: spacing.sm,
   },
