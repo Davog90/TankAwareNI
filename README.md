@@ -2,22 +2,21 @@
 
 A React Native (Expo) MVP that helps Northern Ireland households monitor home heating oil tank levels, forecast when they will run out, receive refill reminders, and track local oil prices.
 
-All data currently comes from mock services and is structured for a future REST backend.
+All data currently comes from mock services — no backend is required to run the app.
 
 ## Features
 
-- **Dashboard** — tank level gauge, days remaining, usage stats, refill suggestion
-- **Forecast** — depletion outlook, confidence, weather impact
+- **Home (Dashboard)** — tank level gauge, litres remaining, days left, refill suggestion
+- **Forecast** — depletion outlook, confidence score, weather impact
 - **Market** — NI average price, trends, forecast, buy recommendation
 - **Alerts** — severity-coded tank, weather, refill, and leak notices
-- **Region** — anonymised Smart City analytics for local government stakeholders
 
 ## Tech stack
 
 - React Native + Expo (SDK 57)
 - TypeScript
 - React Navigation (bottom tabs)
-- Service / repository layer for data access
+- Service / repository layer for data access (mock today, HTTP-ready tomorrow)
 - Expo Vector Icons & Linear Gradient
 
 ## Getting started
@@ -28,6 +27,10 @@ npm start
 ```
 
 Then press `i` for iOS simulator, `a` for Android emulator, or scan the QR code with Expo Go.
+
+```bash
+npm run typecheck
+```
 
 ## Switching to a real API
 
@@ -41,7 +44,7 @@ Then press `i` for iOS simulator, `a` for Android emulator, or scan the QR code 
 src/
   api/            # HTTP client + endpoint paths
   config/         # App config (mock vs REST switch)
-  models/         # Reusable domain data models
+  models/         # Domain data models
   services/       # Domain services + repositories (mock & HTTP)
   hooks/          # Async data hooks for screens
   providers/      # Shared app providers (alerts state)
@@ -56,4 +59,4 @@ src/
 
 ## Design notes
 
-Built for clarity and accessibility: large type, high-contrast teal palette, simple bottom navigation, and a calm dashboard layout suitable for older users.
+Built for clarity and accessibility: large type, high-contrast deep-teal palette, simple four-tab navigation, and a calm dashboard layout suitable for older users.

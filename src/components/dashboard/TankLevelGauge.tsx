@@ -9,6 +9,7 @@ import { StatusBadge } from '../common/StatusBadge';
 interface TankLevelGaugeProps {
   percentFull: number;
   status: TankStatus;
+  daysRemaining?: number;
 }
 
 function fillColorsForStatus(status: TankStatus): [string, string] {
@@ -22,7 +23,11 @@ function fillColorsForStatus(status: TankStatus): [string, string] {
   }
 }
 
-export function TankLevelGauge({ percentFull, status }: TankLevelGaugeProps) {
+export function TankLevelGauge({
+  percentFull,
+  status,
+  daysRemaining,
+}: TankLevelGaugeProps) {
   const clamped = Math.max(6, Math.min(100, percentFull));
   const fillHeight = `${clamped}%` as `${number}%`;
   const [fillTop, fillBottom] = fillColorsForStatus(status);
@@ -55,6 +60,11 @@ export function TankLevelGauge({ percentFull, status }: TankLevelGaugeProps) {
         <StatusBadge label={getTankStatusLabel(status)} tone={status} />
         <Text style={styles.percent}>{formatPercent(percentFull)}</Text>
         <Text style={styles.caption}>Tank level</Text>
+        {typeof daysRemaining === 'number' ? (
+          <Text style={styles.daysHint}>
+            About {daysRemaining} days of oil left
+          </Text>
+        ) : null}
       </View>
     </View>
   );
@@ -136,5 +146,11 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: 'rgba(255,255,255,0.72)',
     marginTop: spacing.xs,
+  },
+  daysHint: {
+    ...typography.bodyBold,
+    color: colors.white,
+    marginTop: spacing.md,
+    lineHeight: 24,
   },
 });

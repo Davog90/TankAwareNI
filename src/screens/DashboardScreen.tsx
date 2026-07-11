@@ -31,9 +31,8 @@ export function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View>
-            <Text style={styles.eyebrow}>TankAware NI</Text>
-            <Text style={styles.title}>Dashboard</Text>
+          <View style={styles.headerText}>
+            <Text style={styles.brand}>TankAware NI</Text>
             <Text style={styles.subtitle}>
               {household.name} · {household.location}
             </Text>
@@ -60,6 +59,7 @@ export function DashboardScreen() {
           <TankLevelGauge
             percentFull={tankInfo.percentFull}
             status={tankInfo.status}
+            daysRemaining={tankInfo.estimatedDaysRemaining}
           />
 
           <View style={styles.heroFooter}>
@@ -150,22 +150,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: spacing.xl,
+    gap: spacing.md,
   },
-  eyebrow: {
-    ...typography.label,
-    color: colors.primary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+  headerText: {
+    flex: 1,
   },
-  title: {
+  brand: {
     ...typography.title,
-    color: colors.text,
-    marginTop: spacing.xs,
+    color: colors.primary,
+    letterSpacing: -0.4,
   },
   subtitle: {
     ...typography.body,
     color: colors.textSecondary,
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   livePill: {
     flexDirection: 'row',

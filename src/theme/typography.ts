@@ -41,8 +41,8 @@ export const typography = {
     letterSpacing: 0.3,
   },
   tab: {
-    fontSize: 12,
-    fontWeight: '600' as const,
+    fontSize: 13,
+    fontWeight: '700' as const,
     lineHeight: 16,
   },
 } as const;

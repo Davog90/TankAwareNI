@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,6 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { ForecastScreen } from '../screens/ForecastScreen';
 import { MarketScreen } from '../screens/MarketScreen';
 import { AlertsScreen } from '../screens/AlertsScreen';
-import { SmartCityScreen } from '../screens/SmartCityScreen';
 import { useAlerts } from '../hooks';
 import { colors, typography } from '../theme';
 import type { RootTabParamList } from './types';
@@ -36,7 +35,6 @@ const tabIcons: Record<
   Forecast: { active: 'calendar', inactive: 'calendar-outline' },
   Market: { active: 'trending-up', inactive: 'trending-up-outline' },
   Alerts: { active: 'notifications', inactive: 'notifications-outline' },
-  SmartCity: { active: 'business', inactive: 'business-outline' },
 };
 
 function MainTabs() {
@@ -50,12 +48,13 @@ function MainTabs() {
         tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: styles.tabLabel,
         tabBarStyle: styles.tabBar,
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarItemStyle: styles.tabItem,
+        tabBarIcon: ({ focused, color }) => {
           const icons = tabIcons[route.name];
           return (
             <Ionicons
               name={focused ? icons.active : icons.inactive}
-              size={size - 1}
+              size={26}
               color={color}
             />
           );
@@ -77,11 +76,6 @@ function MainTabs() {
           tabBarBadgeStyle: styles.badge,
         }}
       />
-      <Tab.Screen
-        name="SmartCity"
-        component={SmartCityScreen}
-        options={{ tabBarLabel: 'Region' }}
-      />
     </Tab.Navigator>
   );
 }
@@ -96,15 +90,20 @@ export function AppNavigator() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 68,
-    paddingTop: 6,
-    paddingBottom: 8,
+    height: Platform.OS === 'ios' ? 88 : 72,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
     backgroundColor: colors.surface,
     borderTopColor: colors.border,
+    borderTopWidth: 1,
+  },
+  tabItem: {
+    paddingTop: 2,
   },
   tabLabel: {
     ...typography.tab,
-    fontSize: 11,
+    fontSize: 13,
+    fontWeight: '700',
     marginTop: 2,
   },
   badge: {
@@ -112,5 +111,9 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 12,
     fontWeight: '700',
+    minWidth: 20,
+    height: 20,
+    lineHeight: 20,
+    borderRadius: 10,
   },
 });

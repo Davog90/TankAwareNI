@@ -249,19 +249,21 @@ const styles = StyleSheet.create({
     paddingRight: spacing.md,
   },
   chip: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
     borderRadius: radii.full,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   chipActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   chipText: {
-    ...typography.caption,
+    ...typography.bodyBold,
     color: colors.textSecondary,
   },
   chipTextActive: {
