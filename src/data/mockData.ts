@@ -1,6 +1,8 @@
 import type {
   AlertItem,
+  DepletionPoint,
   ForecastDay,
+  ForecastSummary,
   Household,
   MarketSummary,
   TankInfo,
@@ -20,7 +22,7 @@ export const tankInfo: TankInfo = {
   status: 'healthy',
   lastUpdated: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
   estimatedDaysRemaining: 31,
-  dailyUsageLitres: 20,
+  dailyUsageLitres: 4.2,
   nextRefillDate: '2026-12-18',
   nextRefillLabel: '18 December 2026',
 };
@@ -28,12 +30,12 @@ export const tankInfo: TankInfo = {
 export const usageStats: UsageStat[] = [
   {
     label: 'Daily use',
-    value: '20 L',
-    hint: '7-day average',
+    value: '4.2 L',
+    hint: '30-day average',
   },
   {
     label: 'This week',
-    value: '138 L',
+    value: '29 L',
     hint: 'Within normal range',
   },
   {
@@ -43,13 +45,28 @@ export const usageStats: UsageStat[] = [
   },
 ];
 
+export const forecastSummary: ForecastSummary = {
+  averageDailyUsageLitres: 4.2,
+  emptyDate: '2026-12-18',
+  emptyDateLabel: '18 December 2026',
+  confidencePercent: 87,
+  horizonDays: 60,
+  weatherImpact: {
+    level: 'moderate',
+    label: 'Moderate impact',
+    temperatureHint: 'Cooler nights expected',
+    usageChangePercent: 12,
+    description:
+      'Forecast lows near 4°C over the next fortnight may lift daily burn by about 12% versus the mild baseline.',
+  },
+};
+
 function buildForecast(): ForecastDay[] {
   const days: ForecastDay[] = [];
   let litres = tankInfo.currentLitres;
   const today = new Date();
-
   const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const usagePattern = [18, 22, 21, 19, 20, 24, 17];
+  const usagePattern = [3.8, 4.5, 4.2, 4.0, 4.3, 4.8, 3.6];
 
   for (let i = 0; i < 21; i += 1) {
     const date = new Date(today);
@@ -61,7 +78,6 @@ function buildForecast(): ForecastDay[] {
     }
 
     const percentFull = (litres / tankInfo.capacityLitres) * 100;
-    const isProjectedEmpty = litres <= 40 && litres > 0;
 
     days.push({
       date: date.toISOString(),
@@ -70,16 +86,49 @@ function buildForecast(): ForecastDay[] {
       percentFull: Math.round(percentFull),
       usageLitres: i === 0 ? 0 : usage,
       isToday: i === 0,
-      isProjectedEmpty,
+      isProjectedEmpty: litres <= 40 && litres > 0,
     });
   }
 
   return days;
 }
 
-export const forecastDays: ForecastDay[] = buildForecast();
+function buildDepletionSeries(days = 60): DepletionPoint[] {
+  const points: DepletionPoint[] = [];
+  let litres = tankInfo.currentLitres;
+  const today = new Date();
+  const baseUsage = forecastSummary.averageDailyUsageLitres;
 
-export const emptyDateEstimate = tankInfo.nextRefillLabel;
+  for (let i = 0; i < days; i += 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    // Mild seasonal/weather variation around the average burn rate
+    const weatherFactor = 1 + Math.sin(i / 9) * 0.08 + (i > 40 ? 0.05 : 0);
+    const usage = i === 0 ? 0 : baseUsage * weatherFactor;
+    if (i > 0) {
+      litres = Math.max(0, litres - usage);
+    }
+
+    const showLabel = i === 0 || i === 19 || i === 39 || i === days - 1;
+    points.push({
+      dayIndex: i,
+      date: date.toISOString().slice(0, 10),
+      label: showLabel
+        ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+        : '',
+      litres: Math.round(litres * 10) / 10,
+    });
+  }
+
+  return points;
+}
+
+export const forecastDays: ForecastDay[] = buildForecast();
+export const depletionSeries: DepletionPoint[] = buildDepletionSeries(
+  forecastSummary.horizonDays,
+);
+export const emptyDateEstimate = forecastSummary.emptyDateLabel;
 
 export const marketSummary: MarketSummary = {
   currentAveragePpl: 68.4,

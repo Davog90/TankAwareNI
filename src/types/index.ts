@@ -32,6 +32,32 @@ export interface ForecastDay {
   isProjectedEmpty?: boolean;
 }
 
+export type WeatherImpactLevel = 'low' | 'moderate' | 'high';
+
+export interface WeatherImpact {
+  level: WeatherImpactLevel;
+  label: string;
+  temperatureHint: string;
+  usageChangePercent: number;
+  description: string;
+}
+
+export interface ForecastSummary {
+  averageDailyUsageLitres: number;
+  emptyDate: string;
+  emptyDateLabel: string;
+  confidencePercent: number;
+  weatherImpact: WeatherImpact;
+  horizonDays: number;
+}
+
+export interface DepletionPoint {
+  dayIndex: number;
+  date: string;
+  label: string;
+  litres: number;
+}
+
 export interface PricePoint {
   date: string;
   label: string;

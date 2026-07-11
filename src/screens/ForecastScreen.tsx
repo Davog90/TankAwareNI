@@ -1,53 +1,79 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../components/common/Card';
-import { ScreenHeader } from '../components/common/ScreenHeader';
-import { SectionLabel } from '../components/common/SectionLabel';
-import { StatusBadge } from '../components/common/StatusBadge';
-import { DayEstimateRow } from '../components/forecast/DayEstimateRow';
-import { ForecastChart } from '../components/forecast/ForecastChart';
-import { emptyDateEstimate, forecastDays, tankInfo } from '../data/mockData';
-import { colors, spacing, typography } from '../theme';
+import { MetricCard } from '../components/dashboard/MetricCard';
+import { ConfidenceScoreCard } from '../components/forecast/ConfidenceScoreCard';
+import { DepletionLineChart } from '../components/forecast/DepletionLineChart';
+import { WeatherImpactCard } from '../components/forecast/WeatherImpactCard';
+import {
+  depletionSeries,
+  forecastSummary,
+  tankInfo,
+} from '../data/mockData';
+import { colors, radii, spacing, typography } from '../theme';
 
 export function ForecastScreen() {
-  const nearTerm = forecastDays.slice(0, 10);
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader
-          title="Forecast"
-          subtitle="Estimated tank level based on recent usage"
-        />
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>Projection</Text>
+          <Text style={styles.title}>Forecast</Text>
+          <Text style={styles.subtitle}>
+            60-day depletion outlook from simulated household usage
+          </Text>
+        </View>
 
-        <Card style={styles.summaryCard}>
-          <StatusBadge label="Projection" tone="info" />
-          <Text style={styles.summaryTitle}>Likely to need oil by</Text>
-          <Text style={styles.summaryDate}>{emptyDateEstimate}</Text>
-          <Text style={styles.summaryBody}>
-            At about {tankInfo.dailyUsageLitres.toFixed(1)} L per day, your tank
-            should last roughly {tankInfo.estimatedDaysRemaining} more days.
+        <Card style={styles.heroCard}>
+          <View style={styles.heroIcon}>
+            <Ionicons name="calendar" size={22} color={colors.primary} />
+          </View>
+          <Text style={styles.heroLabel}>Forecasted empty date</Text>
+          <Text style={styles.heroDate}>{forecastSummary.emptyDateLabel}</Text>
+          <Text style={styles.heroBody}>
+            At {forecastSummary.averageDailyUsageLitres.toFixed(1)} L per day,
+            your {tankInfo.currentLitres} L balance is projected to run out on
+            this date.
           </Text>
         </Card>
 
-        <View style={styles.section}>
-          <SectionLabel title="Level outlook" icon="bar-chart-outline" />
-          <ForecastChart days={forecastDays} />
+        <View style={styles.metricsGrid}>
+          <MetricCard
+            label="Avg daily usage"
+            value={`${forecastSummary.averageDailyUsageLitres.toFixed(1)} L`}
+            hint="Simulated 30-day mean"
+            icon="speedometer-outline"
+            accent={colors.info}
+            accentSoft={colors.infoSoft}
+          />
+          <MetricCard
+            label="Confidence"
+            value={`${forecastSummary.confidencePercent}%`}
+            hint="Model certainty"
+            icon="shield-checkmark-outline"
+            accent={colors.success}
+            accentSoft={colors.successSoft}
+          />
         </View>
 
         <View style={styles.section}>
-          <SectionLabel title="Day-by-day estimate" icon="calendar-outline" />
-          <Card padded={false} style={styles.listCard}>
-            <View style={styles.listInner}>
-              {nearTerm.map((day) => (
-                <DayEstimateRow key={day.date} day={day} />
-              ))}
-            </View>
-          </Card>
+          <ConfidenceScoreCard score={forecastSummary.confidencePercent} />
+        </View>
+
+        <View style={styles.section}>
+          <WeatherImpactCard impact={forecastSummary.weatherImpact} />
+        </View>
+
+        <View style={styles.section}>
+          <DepletionLineChart
+            series={depletionSeries}
+            emptyDateLabel={forecastSummary.emptyDateLabel}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -63,34 +89,66 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: spacing.huge,
   },
-  summaryCard: {
-    marginBottom: spacing.xxl,
-    backgroundColor: colors.primaryMuted,
-    borderColor: '#C5D9E0',
+  header: {
+    marginBottom: spacing.xl,
   },
-  summaryTitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.lg,
-  },
-  summaryDate: {
-    ...typography.title,
+  eyebrow: {
+    ...typography.label,
     color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  title: {
+    ...typography.title,
+    color: colors.text,
     marginTop: spacing.xs,
   },
-  summaryBody: {
+  subtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  heroCard: {
+    marginBottom: spacing.md,
+    backgroundColor: colors.primaryMuted,
+    borderColor: '#C5D9E0',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
+  },
+  heroIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.md,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  heroLabel: {
+    ...typography.label,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+  },
+  heroDate: {
+    ...typography.title,
+    color: colors.primary,
+    marginTop: spacing.sm,
+  },
+  heroBody: {
     ...typography.body,
     color: colors.textSecondary,
     marginTop: spacing.md,
   },
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
   section: {
-    marginBottom: spacing.xxl,
-  },
-  listCard: {
-    overflow: 'hidden',
-  },
-  listInner: {
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
   },
 });
