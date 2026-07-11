@@ -7,13 +7,21 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AlertItem } from '../components/alerts/AlertItem';
-import { ScreenHeader } from '../components/common/ScreenHeader';
+import { AlertCard } from '../components/alerts/AlertCard';
+import { Card } from '../components/common/Card';
 import { alerts as mockAlerts } from '../data/mockData';
 import { colors, radii, spacing, typography } from '../theme';
-import type { AlertItem as AlertItemType } from '../types';
+import type { AlertItem as AlertItemType, AlertSeverity } from '../types';
 
-type FilterKey = 'all' | 'unread';
+type FilterKey = 'all' | 'unread' | AlertSeverity;
+
+const severityFilters: Array<{ key: FilterKey; label: string }> = [
+  { key: 'all', label: 'All' },
+  { key: 'unread', label: 'Unread' },
+  { key: 'critical', label: 'Critical' },
+  { key: 'warning', label: 'Warning' },
+  { key: 'info', label: 'Info' },
+];
 
 export function AlertsScreen() {
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -24,9 +32,17 @@ export function AlertsScreen() {
     [items],
   );
 
+  const criticalCount = useMemo(
+    () => items.filter((item) => item.severity === 'critical').length,
+    [items],
+  );
+
   const visible = useMemo(() => {
     if (filter === 'unread') {
       return items.filter((item) => !item.read);
+    }
+    if (filter === 'critical' || filter === 'warning' || filter === 'info') {
+      return items.filter((item) => item.severity === filter);
     }
     return items;
   }, [filter, items]);
@@ -35,36 +51,56 @@ export function AlertsScreen() {
     setItems((current) => current.map((item) => ({ ...item, read: true })));
   };
 
+  const toggleRead = (id: string) => {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === id ? { ...item, read: !item.read } : item,
+      ),
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader
-          title="Alerts"
-          subtitle={
-            unreadCount > 0
-              ? `${unreadCount} unread reminder${unreadCount === 1 ? '' : 's'}`
-              : 'You are up to date'
-          }
-        />
+        <View style={styles.header}>
+          <Text style={styles.eyebrow}>Notifications</Text>
+          <Text style={styles.title}>Alerts</Text>
+          <Text style={styles.subtitle}>
+            {unreadCount > 0
+              ? `${unreadCount} unread · ${criticalCount} critical`
+              : 'You are up to date'}
+          </Text>
+        </View>
+
+        <Card style={styles.legendCard}>
+          <Text style={styles.legendTitle}>Severity guide</Text>
+          <View style={styles.legendRow}>
+            <SeverityLegendSwatch tone="critical" label="Critical" />
+            <SeverityLegendSwatch tone="warning" label="Warning" />
+            <SeverityLegendSwatch tone="info" label="Info" />
+          </View>
+        </Card>
 
         <View style={styles.toolbar}>
-          <View style={styles.filters}>
-            <FilterChip
-              label="All"
-              active={filter === 'all'}
-              onPress={() => setFilter('all')}
-            />
-            <FilterChip
-              label="Unread"
-              active={filter === 'unread'}
-              onPress={() => setFilter('unread')}
-            />
-          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filters}
+          >
+            {severityFilters.map((item) => (
+              <FilterChip
+                key={item.key}
+                label={item.label}
+                active={filter === item.key}
+                onPress={() => setFilter(item.key)}
+              />
+            ))}
+          </ScrollView>
           {unreadCount > 0 ? (
-            <Pressable onPress={markAllRead} hitSlop={8}>
+            <Pressable onPress={markAllRead} hitSlop={8} style={styles.markReadBtn}>
               <Text style={styles.markRead}>Mark all read</Text>
             </Pressable>
           ) : null}
@@ -72,16 +108,44 @@ export function AlertsScreen() {
 
         {visible.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No unread alerts</Text>
+            <Text style={styles.emptyTitle}>No alerts in this view</Text>
             <Text style={styles.emptyBody}>
-              New refill reminders and price updates will appear here.
+              Try another filter to see tank, weather, and refill notices.
             </Text>
           </View>
         ) : (
-          visible.map((alert) => <AlertItem key={alert.id} alert={alert} />)
+          visible.map((alert) => (
+            <AlertCard
+              key={alert.id}
+              alert={alert}
+              onPress={() => toggleRead(alert.id)}
+            />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function SeverityLegendSwatch({
+  tone,
+  label,
+}: {
+  tone: AlertSeverity;
+  label: string;
+}) {
+  const color =
+    tone === 'critical'
+      ? colors.danger
+      : tone === 'warning'
+        ? colors.warning
+        : colors.info;
+
+  return (
+    <View style={styles.legendItem}>
+      <View style={[styles.legendDot, { backgroundColor: color }]} />
+      <Text style={styles.legendLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -115,16 +179,66 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: spacing.huge,
   },
-  toolbar: {
+  header: {
+    marginBottom: spacing.xl,
+  },
+  eyebrow: {
+    ...typography.label,
+    color: colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  title: {
+    ...typography.title,
+    color: colors.text,
+    marginTop: spacing.xs,
+  },
+  subtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  legendCard: {
+    marginBottom: spacing.lg,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
+  },
+  legendTitle: {
+    ...typography.label,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    marginBottom: spacing.md,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.lg,
+  },
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xl,
+    gap: spacing.sm,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  legendLabel: {
+    ...typography.bodyBold,
+    color: colors.text,
+  },
+  toolbar: {
+    marginBottom: spacing.lg,
     gap: spacing.md,
   },
   filters: {
     flexDirection: 'row',
     gap: spacing.sm,
+    paddingRight: spacing.md,
   },
   chip: {
     paddingHorizontal: spacing.lg,
@@ -144,6 +258,9 @@ const styles = StyleSheet.create({
   },
   chipTextActive: {
     color: colors.white,
+  },
+  markReadBtn: {
+    alignSelf: 'flex-start',
   },
   markRead: {
     ...typography.bodyBold,

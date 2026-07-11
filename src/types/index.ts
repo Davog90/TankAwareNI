@@ -2,7 +2,17 @@ export type TankStatus = 'healthy' | 'low' | 'critical';
 
 export type AlertSeverity = 'info' | 'warning' | 'critical';
 
-export type AlertType = 'refill' | 'price' | 'forecast' | 'system';
+export type AlertType = 'refill' | 'price' | 'forecast' | 'weather' | 'leak' | 'system';
+
+export interface AlertItem {
+  id: string;
+  type: AlertType;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
 
 export interface Household {
   name: string;
@@ -110,16 +120,6 @@ export interface MarketSummary extends MarketIntelligence {
   currentAveragePpl: number;
   changeTodayPpl: number;
   changeWeekPpl: number;
-}
-
-export interface AlertItem {
-  id: string;
-  type: AlertType;
-  severity: AlertSeverity;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
 }
 
 export interface UsageStat {
