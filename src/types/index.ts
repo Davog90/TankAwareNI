@@ -127,3 +127,32 @@ export interface UsageStat {
   value: string;
   hint: string;
 }
+
+export type FuelPovertyRisk = 'Low' | 'Medium' | 'High';
+
+export interface RegionalDistributionBucket {
+  label: string;
+  households: number;
+  colorHint: 'healthy' | 'watch' | 'low' | 'critical';
+}
+
+export interface RegionalTrendPoint {
+  weekLabel: string;
+  averageTankPercent: number;
+  householdsBelow20: number;
+  predictedRunOuts: number;
+}
+
+export interface SmartCityStats {
+  regionName: string;
+  pilotHomes: number;
+  averageTankLevelPercent: number;
+  householdsBelow20: number;
+  predictedRunOuts: number;
+  fuelPovertyRisk: FuelPovertyRisk;
+  lastUpdated: string;
+  anonymisationNote: string;
+  distribution: RegionalDistributionBucket[];
+  weeklyTrends: RegionalTrendPoint[];
+  councilInsight: string;
+}

@@ -10,6 +10,7 @@ All data is simulated — no backend required.
 - **Forecast** — 3-week level outlook and day-by-day estimates
 - **Market** — NI average price, 14-day trend, local supplier quotes
 - **Alerts** — refill, price, and weather reminders with unread filtering
+- **Region** — anonymised Smart City analytics for local government stakeholders
 
 ## Tech stack
 

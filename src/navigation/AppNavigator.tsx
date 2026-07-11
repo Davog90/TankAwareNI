@@ -7,6 +7,7 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { ForecastScreen } from '../screens/ForecastScreen';
 import { MarketScreen } from '../screens/MarketScreen';
 import { AlertsScreen } from '../screens/AlertsScreen';
+import { SmartCityScreen } from '../screens/SmartCityScreen';
 import { colors, typography } from '../theme';
 import type { RootTabParamList } from './types';
 import { alerts } from '../data/mockData';
@@ -35,6 +36,7 @@ const tabIcons: Record<
   Forecast: { active: 'calendar', inactive: 'calendar-outline' },
   Market: { active: 'trending-up', inactive: 'trending-up-outline' },
   Alerts: { active: 'notifications', inactive: 'notifications-outline' },
+  SmartCity: { active: 'business', inactive: 'business-outline' },
 };
 
 const unreadAlerts = alerts.filter((alert) => !alert.read).length;
@@ -54,7 +56,7 @@ export function AppNavigator() {
             return (
               <Ionicons
                 name={focused ? icons.active : icons.inactive}
-                size={size}
+                size={size - 1}
                 color={color}
               />
             );
@@ -76,6 +78,11 @@ export function AppNavigator() {
             tabBarBadgeStyle: styles.badge,
           }}
         />
+        <Tab.Screen
+          name="SmartCity"
+          component={SmartCityScreen}
+          options={{ tabBarLabel: 'Region' }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
@@ -91,6 +98,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     ...typography.tab,
+    fontSize: 11,
     marginTop: 2,
   },
   badge: {

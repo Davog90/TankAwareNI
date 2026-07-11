@@ -5,6 +5,7 @@ import type {
   ForecastSummary,
   Household,
   MarketSummary,
+  SmartCityStats,
   TankInfo,
   UsageStat,
 } from '../types';
@@ -256,4 +257,63 @@ export const refillSuggestion = {
   recommendedLitres: 290,
   estimatedCost: 168.2,
   reason: 'Top up to full capacity ahead of colder weather.',
+};
+
+export const smartCityStats: SmartCityStats = {
+  regionName: 'Lisburn & Castlereagh pilot',
+  pilotHomes: 100,
+  averageTankLevelPercent: 52,
+  householdsBelow20: 14,
+  predictedRunOuts: 7,
+  fuelPovertyRisk: 'Medium',
+  lastUpdated: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
+  anonymisationNote:
+    'All figures are aggregated and anonymised. No household addresses or personal identifiers are shown.',
+  distribution: [
+    { label: '80–100%', households: 18, colorHint: 'healthy' },
+    { label: '60–79%', households: 27, colorHint: 'healthy' },
+    { label: '40–59%', households: 24, colorHint: 'watch' },
+    { label: '20–39%', households: 17, colorHint: 'low' },
+    { label: 'Below 20%', households: 14, colorHint: 'critical' },
+  ],
+  weeklyTrends: [
+    {
+      weekLabel: 'W1',
+      averageTankPercent: 61,
+      householdsBelow20: 8,
+      predictedRunOuts: 3,
+    },
+    {
+      weekLabel: 'W2',
+      averageTankPercent: 58,
+      householdsBelow20: 9,
+      predictedRunOuts: 4,
+    },
+    {
+      weekLabel: 'W3',
+      averageTankPercent: 56,
+      householdsBelow20: 11,
+      predictedRunOuts: 5,
+    },
+    {
+      weekLabel: 'W4',
+      averageTankPercent: 54,
+      householdsBelow20: 12,
+      predictedRunOuts: 5,
+    },
+    {
+      weekLabel: 'W5',
+      averageTankPercent: 53,
+      householdsBelow20: 13,
+      predictedRunOuts: 6,
+    },
+    {
+      weekLabel: 'W6',
+      averageTankPercent: 52,
+      householdsBelow20: 14,
+      predictedRunOuts: 7,
+    },
+  ],
+  councilInsight:
+    'Fourteen pilot homes are below 20% capacity, with seven predicted run-outs in the next fortnight. A targeted refill outreach in colder postcodes could reduce fuel-poverty risk before demand peaks.',
 };

@@ -3,4 +3,5 @@ export type RootTabParamList = {
   Forecast: undefined;
   Market: undefined;
   Alerts: undefined;
+  SmartCity: undefined;
 };
