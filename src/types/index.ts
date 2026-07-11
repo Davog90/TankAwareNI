@@ -18,6 +18,8 @@ export interface TankInfo {
   lastUpdated: string;
   estimatedDaysRemaining: number;
   dailyUsageLitres: number;
+  nextRefillDate: string;
+  nextRefillLabel: string;
 }
 
 export interface ForecastDay {

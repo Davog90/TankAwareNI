@@ -3,94 +3,101 @@ import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, radii, spacing, typography } from '../../theme';
 import type { TankStatus } from '../../types';
-import { formatLitres, formatPercent, getTankStatusLabel } from '../../utils/formatters';
+import { formatPercent, getTankStatusLabel } from '../../utils/formatters';
 import { StatusBadge } from '../common/StatusBadge';
 
 interface TankLevelGaugeProps {
   percentFull: number;
-  currentLitres: number;
-  capacityLitres: number;
   status: TankStatus;
-  daysRemaining: number;
 }
 
-function fillColorForStatus(status: TankStatus): string {
+function fillColorsForStatus(status: TankStatus): [string, string] {
   switch (status) {
     case 'critical':
-      return colors.tankFillCritical;
+      return ['#E85A4F', '#B42318'];
     case 'low':
-      return colors.tankFillLow;
+      return ['#E0A04A', '#C47A1A'];
     default:
-      return colors.tankFill;
+      return ['#2F8FA8', '#1A5A6E'];
   }
 }
 
-export function TankLevelGauge({
-  percentFull,
-  currentLitres,
-  capacityLitres,
-  status,
-  daysRemaining,
-}: TankLevelGaugeProps) {
-  const fillHeight = `${Math.max(8, Math.min(100, percentFull))}%` as `${number}%`;
-  const fillColor = fillColorForStatus(status);
+export function TankLevelGauge({ percentFull, status }: TankLevelGaugeProps) {
+  const clamped = Math.max(6, Math.min(100, percentFull));
+  const fillHeight = `${clamped}%` as `${number}%`;
+  const [fillTop, fillBottom] = fillColorsForStatus(status);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.gaugeColumn}>
+    <View style={styles.wrapper}>
+      <View style={styles.tankColumn}>
+        <View style={styles.tankCap} />
+        <View style={styles.tankNeck} />
         <View style={styles.tankShell}>
           <View style={styles.tankInner}>
-            <View style={[styles.fill, { height: fillHeight, backgroundColor: fillColor }]}>
-              <LinearGradient
-                colors={['rgba(255,255,255,0.18)', 'transparent']}
-                style={StyleSheet.absoluteFill}
+            <LinearGradient
+              colors={[fillTop, fillBottom]}
+              style={[styles.fill, { height: fillHeight }]}
+            >
+              <View style={styles.oilSheen} />
+            </LinearGradient>
+
+            {[25, 50, 75].map((mark) => (
+              <View
+                key={mark}
+                style={[styles.levelMark, { bottom: `${mark}%` }]}
               />
-            </View>
+            ))}
           </View>
-          <View style={styles.tankCap} />
         </View>
-        <Text style={styles.capacityLabel}>{formatLitres(capacityLitres)} tank</Text>
       </View>
 
-      <View style={styles.details}>
+      <View style={styles.readout}>
         <StatusBadge label={getTankStatusLabel(status)} tone={status} />
         <Text style={styles.percent}>{formatPercent(percentFull)}</Text>
-        <Text style={styles.litres}>
-          {formatLitres(currentLitres)} remaining
-        </Text>
-        <View style={styles.daysBox}>
-          <Text style={styles.daysValue}>{daysRemaining}</Text>
-          <Text style={styles.daysLabel}>days of heat left</Text>
-        </View>
+        <Text style={styles.caption}>Tank level</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xxl,
+    justifyContent: 'center',
+    gap: spacing.xxxl,
   },
-  gaugeColumn: {
+  tankColumn: {
     alignItems: 'center',
   },
+  tankCap: {
+    width: 42,
+    height: 10,
+    borderRadius: radii.sm,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  tankNeck: {
+    width: 22,
+    height: 14,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
+  },
   tankShell: {
-    width: 92,
-    height: 160,
-    borderRadius: radii.lg,
-    borderWidth: 3,
-    borderColor: colors.primary,
-    backgroundColor: colors.surfaceAlt,
-    padding: 6,
-    justifyContent: 'flex-end',
+    width: 108,
+    height: 168,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    padding: 7,
   },
   tankInner: {
     flex: 1,
-    borderRadius: radii.md,
+    borderRadius: 22,
     overflow: 'hidden',
-    backgroundColor: colors.tankEmpty,
+    backgroundColor: 'rgba(0,0,0,0.22)',
     justifyContent: 'flex-end',
   },
   fill: {
@@ -98,47 +105,36 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 4,
     borderTopRightRadius: 4,
   },
-  tankCap: {
+  oilSheen: {
     position: 'absolute',
-    top: -10,
-    alignSelf: 'center',
-    width: 36,
-    height: 12,
-    borderRadius: radii.sm,
-    backgroundColor: colors.primary,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 18,
+    backgroundColor: 'rgba(255,255,255,0.16)',
   },
-  capacityLabel: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginTop: spacing.sm,
+  levelMark: {
+    position: 'absolute',
+    left: 0,
+    width: 14,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.28)',
   },
-  details: {
+  readout: {
     flex: 1,
+    maxWidth: 160,
   },
   percent: {
-    ...typography.hero,
-    color: colors.text,
+    fontSize: 56,
+    fontWeight: '700',
+    lineHeight: 62,
+    color: colors.white,
     marginTop: spacing.md,
+    letterSpacing: -1.5,
   },
-  litres: {
+  caption: {
     ...typography.body,
-    color: colors.textSecondary,
+    color: 'rgba(255,255,255,0.72)',
     marginTop: spacing.xs,
-  },
-  daysBox: {
-    marginTop: spacing.lg,
-    backgroundColor: colors.primaryMuted,
-    borderRadius: radii.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  daysValue: {
-    ...typography.heading,
-    color: colors.primary,
-  },
-  daysLabel: {
-    ...typography.caption,
-    color: colors.primaryLight,
-    marginTop: 2,
   },
 });

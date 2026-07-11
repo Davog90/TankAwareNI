@@ -14,30 +14,32 @@ export const household: Household = {
 };
 
 export const tankInfo: TankInfo = {
-  capacityLitres: 1200,
-  currentLitres: 384,
-  percentFull: 32,
-  status: 'low',
-  lastUpdated: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-  estimatedDaysRemaining: 19,
-  dailyUsageLitres: 20.2,
+  capacityLitres: 912,
+  currentLitres: 620,
+  percentFull: 68,
+  status: 'healthy',
+  lastUpdated: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
+  estimatedDaysRemaining: 31,
+  dailyUsageLitres: 20,
+  nextRefillDate: '2026-12-18',
+  nextRefillLabel: '18 December 2026',
 };
 
 export const usageStats: UsageStat[] = [
   {
     label: 'Daily use',
-    value: '20.2 L',
+    value: '20 L',
     hint: '7-day average',
   },
   {
     label: 'This week',
-    value: '141 L',
-    hint: 'Slightly above normal',
+    value: '138 L',
+    hint: 'Within normal range',
   },
   {
     label: 'Last refill',
-    value: '28 Jan',
-    hint: '900 L delivered',
+    value: '4 Nov',
+    hint: '700 L delivered',
   },
 ];
 
@@ -77,17 +79,7 @@ function buildForecast(): ForecastDay[] {
 
 export const forecastDays: ForecastDay[] = buildForecast();
 
-export const emptyDateEstimate = (() => {
-  const emptyDay = forecastDays.find((day) => day.estimatedLitres <= 40);
-  if (!emptyDay) {
-    return 'Beyond 3 weeks';
-  }
-  return new Date(emptyDay.date).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
-})();
+export const emptyDateEstimate = tankInfo.nextRefillLabel;
 
 export const marketSummary: MarketSummary = {
   currentAveragePpl: 68.4,
@@ -155,10 +147,10 @@ export const alerts: AlertItem[] = [
   {
     id: 'a1',
     type: 'refill',
-    severity: 'warning',
-    title: 'Tank running low',
+    severity: 'info',
+    title: 'Refill planned',
     message:
-      'Your tank is at 32%. At current usage you may need a refill within 19 days. Consider ordering soon.',
+      'Your tank is at 68%. At current usage you have about 31 days left. Next refill is planned for 18 December 2026.',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     read: false,
   },
@@ -175,7 +167,7 @@ export const alerts: AlertItem[] = [
   {
     id: 'a3',
     type: 'forecast',
-    severity: 'critical',
+    severity: 'warning',
     title: 'Cold spell may raise usage',
     message:
       'Overnight lows near 2°C are forecast next week. Daily burn could rise by about 15%.',
@@ -205,7 +197,7 @@ export const alerts: AlertItem[] = [
 ];
 
 export const refillSuggestion = {
-  recommendedLitres: 800,
-  estimatedCost: 547.2,
-  reason: 'Bring the tank back to about 98% before colder weather.',
+  recommendedLitres: 290,
+  estimatedCost: 198.4,
+  reason: 'Top up to full capacity ahead of colder weather.',
 };
